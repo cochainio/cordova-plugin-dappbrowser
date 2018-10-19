@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-dappbrowser"
+        version="1.0.0">
+
+    <name>DappBrowser</name>
+    <description>Cordova DappBrowser Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,dapp,browser,dappbrowser</keywords>
+    <repo>https://github.com/cochainio/cordova-plugin-dappbrowser.git</repo>
+    <issue>https://github.com/cochainio/cordova-plugin-dappbrowser/issues</issue>
+
+    <engines>
+        <engine name="cordova" version=">=8.1.0" />
+    </engines>
+
+    <platform name="android">
+        <js-module src="www/dappbrowser.js" name="dappbrowser">
+            <clobbers target="cordova.DappBrowser.open" />
+            <clobbers target="window.open" />
+        </js-module>
+
+        <hook type="after_plugin_add" src="hooks/support-kotlin.js" />
+        <hook type="after_platform_add" src="hooks/support-kotlin.js" />
+        <framework src="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.71" />
+        <apply-plugin>kotlin-android-extensions</apply-plugin>
+        <apply-plugin>kotlin-kapt</apply-plugin>
+
+        <hook type="before_plugin_rm" src="hooks/on-uninstall.js" />
+        <hook type="before_plugin_uninstall" src="hooks/on-uninstall.js" />
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="DappBrowser">
+                <param name="android-package" value="io.cochain.dappbrowser.DappBrowser"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/DappBrowser.kt" target-dir="app/src/main/java/io/cochain/dappbrowser" />
+        <source-file src="src/android/DappBrowserDialog.kt" target-dir="app/src/main/java/io/cochain/dappbrowser" />
+        <source-file src="src/android/DappChromeClient.kt" target-dir="app/src/main/java/io/cochain/dappbrowser" />
+
+        <resource-file src="src/android/res/drawable-hdpi" target="res/drawable-hdpi" />
+        <resource-file src="src/android/res/drawable-mdpi" target="res/drawable-mdpi" />
+        <resource-file src="src/android/res/drawable-xhdpi" target="res/drawable-xhdpi" />
+        <resource-file src="src/android/res/drawable-xxhdpi" target="res/drawable-xxhdpi" />
+
+        <source-file src="src/android/build-extras.gradle" target-dir="."/>
+
+    </platform>
+</plugin>

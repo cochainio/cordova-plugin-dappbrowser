@@ -1,0 +1,18 @@
+{
+  "name": "cordova-plugin-dappbrowser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/cochainio/cordova-plugin-dappbrowser",
+  "author": "RideWindX <ridewindx@163.com>",
+  "license": "Apache-2.0",
+  "cordova": {
+    "id": "cordova-plugin-dappbrowser",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "dependencies": {
+    "xml2js": "^0.4.19"
+  }
+}
