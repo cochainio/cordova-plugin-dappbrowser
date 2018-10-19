@@ -31,7 +31,7 @@
   var modulemapper = require('cordova/modulemapper')
   var urlutil = require('cordova/urlutil')
 
-  function InAppBrowser () {
+  function DappBrowser () {
     this.channels = {
       'beforeload': channel.create('beforeload'),
       'loadstart': channel.create('loadstart'),
@@ -42,7 +42,7 @@
     }
   }
 
-  InAppBrowser.prototype = {
+  DappBrowser.prototype = {
     _eventHandler: function (event) {
       if (event && (event.type in this.channels)) {
         if (event.type === 'beforeload') {
@@ -54,16 +54,16 @@
     },
     _loadAfterBeforeload: function (strUrl) {
       strUrl = urlutil.makeAbsolute(strUrl)
-      exec(null, null, 'InAppBrowser', 'loadAfterBeforeload', [strUrl])
+      exec(null, null, 'DappBrowser', 'loadAfterBeforeload', [strUrl])
     },
     close: function (eventname) {
-      exec(null, null, 'InAppBrowser', 'close', [])
+      exec(null, null, 'DappBrowser', 'close', [])
     },
     show: function (eventname) {
-      exec(null, null, 'InAppBrowser', 'show', [])
+      exec(null, null, 'DappBrowser', 'show', [])
     },
     hide: function (eventname) {
-      exec(null, null, 'InAppBrowser', 'hide', [])
+      exec(null, null, 'DappBrowser', 'hide', [])
     },
     addEventListener: function (eventname, f) {
       if (eventname in this.channels) {
@@ -78,10 +78,10 @@
 
     executeScript: function (injectDetails, cb) {
       if (injectDetails.code) {
-        exec(cb, null, 'InAppBrowser', 'injectScriptCode',
+        exec(cb, null, 'DappBrowser', 'injectScriptCode',
           [injectDetails.code, !!cb])
       } else if (injectDetails.file) {
-        exec(cb, null, 'InAppBrowser', 'injectScriptFile',
+        exec(cb, null, 'DappBrowser', 'injectScriptFile',
           [injectDetails.file, !!cb])
       } else {
         throw new Error(
@@ -91,10 +91,10 @@
 
     insertCSS: function (injectDetails, cb) {
       if (injectDetails.code) {
-        exec(cb, null, 'InAppBrowser', 'injectStyleCode',
+        exec(cb, null, 'DappBrowser', 'injectStyleCode',
           [injectDetails.code, !!cb])
       } else if (injectDetails.file) {
-        exec(cb, null, 'InAppBrowser', 'injectStyleFile',
+        exec(cb, null, 'DappBrowser', 'injectStyleFile',
           [injectDetails.file, !!cb])
       } else {
         throw new Error(
@@ -112,7 +112,7 @@
     }
 
     strUrl = urlutil.makeAbsolute(strUrl)
-    var iab = new InAppBrowser()
+    var iab = new DappBrowser()
 
     callbacks = callbacks || {}
     for (var callbackName in callbacks) {
@@ -125,7 +125,7 @@
 
     strWindowFeatures = strWindowFeatures || ''
 
-    exec(cb, cb, 'InAppBrowser', 'open',
+    exec(cb, cb, 'DappBrowser', 'open',
       [strUrl, strWindowName, strWindowFeatures])
     return iab
   }

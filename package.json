@@ -12,6 +12,13 @@
       "ios"
     ]
   },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova": ">=8.1.0"
+      }
+    }
+  },
   "dependencies": {
     "xml2js": "^0.4.19"
   }

@@ -761,7 +761,7 @@ class DappBrowser : CordovaPlugin() {
                         )
                     }
                 }
-                val client = DappBrowserClient(thatWebView, edittext)
+                val client = DappBrowserClient(thatWebView, thatDappBrowser.edittext!!)
                 dappWebView!!.webViewClient = client
                 val settings = dappWebView!!.settings
                 settings.javaScriptEnabled = true
@@ -927,7 +927,7 @@ class DappBrowser : CordovaPlugin() {
      * @param webView
      * @param mEditText
      */
-        (private var webView: CordovaWebView, private var edittext: EditText?) : WebViewClient() {
+        (private var webView: CordovaWebView, private var edittext: EditText) : WebViewClient() {
 
         /**
          * Override the URL that should be loaded
@@ -1028,7 +1028,7 @@ class DappBrowser : CordovaPlugin() {
          * @param url
          * @param favicon
          */
-        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap) {
+        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
             val newloc = if (url.startsWith("http:") || url.startsWith("https:") || url.startsWith("file:")) {
                 url
@@ -1040,8 +1040,8 @@ class DappBrowser : CordovaPlugin() {
             }
 
             // Update the UI if we haven't already
-            if (newloc != edittext?.text.toString()) { // TODO
-                edittext?.setText(newloc)
+            if (newloc != edittext.text.toString()) { // TODO
+                edittext.setText(newloc)
             }
 
             try {
