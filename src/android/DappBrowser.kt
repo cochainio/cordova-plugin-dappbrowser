@@ -28,6 +28,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.text.InputType
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
@@ -37,13 +38,7 @@ import android.view.WindowManager
 import android.view.WindowManager.LayoutParams
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.webkit.CookieManager
-import android.webkit.CookieSyncManager
-import android.webkit.HttpAuthHandler
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -73,6 +68,7 @@ class DappBrowser : CordovaPlugin() {
     private var dialog: DappBrowserDialog? = null
     private var dappWebView: WebView? = null
     private var edittext: EditText? = null
+    private var dappJsObject: DappJsObject? = null
 
     private var showLocationBar = true
     private var showZoomControls = true
@@ -201,18 +197,32 @@ class DappBrowser : CordovaPlugin() {
             }
 
             "show" -> {
-                this.cordova.activity.runOnUiThread { dialog!!.show() }
-                val pluginResult = PluginResult(PluginResult.Status.OK)
-                pluginResult.keepCallback = true
-                this.callbackContext!!.sendPluginResult(pluginResult)
+                if (dialog != null) {
+                    this.cordova.activity.runOnUiThread { dialog!!.show() }
+                    val pluginResult = PluginResult(PluginResult.Status.OK)
+                    pluginResult.keepCallback = true
+                    this.callbackContext!!.sendPluginResult(pluginResult)
+                }
             }
 
             "hide" -> {
-                this.cordova.activity.runOnUiThread { dialog!!.hide() }
-                val pluginResult = PluginResult(PluginResult.Status.OK)
-                pluginResult.keepCallback = true
-                this.callbackContext!!.sendPluginResult(pluginResult)
+                if (dialog != null) {
+                    this.cordova.activity.runOnUiThread { dialog!!.hide() }
+                    val pluginResult = PluginResult(PluginResult.Status.OK)
+                    pluginResult.keepCallback = true
+                    this.callbackContext!!.sendPluginResult(pluginResult)
+                }
             }
+
+            "reply" -> {
+                val method = args.getString(0)
+                val methodID = args.getInt(1)
+                val response = args.getJSONObject(2)
+                if (dappJsObject != null) {
+                    dappJsObject!!.reply(method, methodID, response)
+                }
+            }
+
             else -> return false
         }
         return true
@@ -571,7 +581,7 @@ class DappBrowser : CordovaPlugin() {
 
                 // Let's create the main dialog
                 dialog = DappBrowserDialog(cordova.activity, android.R.style.Theme_NoTitleBar, thatDappBrowser)
-                dialog!!.window!!.attributes.windowAnimations = android.R.style.Animation_Dialog
+                dialog!!.window!!.attributes.windowAnimations = android.R.style.Animation_Translucent
                 dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
                 dialog!!.setCancelable(true)
 
@@ -807,6 +817,9 @@ class DappBrowser : CordovaPlugin() {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     CookieManager.getInstance().setAcceptThirdPartyCookies(dappWebView, true)
                 }
+
+                dappJsObject = DappJsObject(dappWebView!!)
+                dappWebView!!.addJavascriptInterface(dappJsObject!!, "cochain")
 
                 dappWebView!!.loadUrl(url)
                 dappWebView!!.id = Integer.valueOf(6)!!
@@ -1113,7 +1126,38 @@ class DappBrowser : CordovaPlugin() {
         }
     }
 
+    inner class DappJsObject(private val webView: WebView) {
+        private val replyCallback = "cochain.callback"
+
+        @JavascriptInterface
+        fun exec(request: String): Int {
+            Log.d(LOG_TAG, "DappJsObject exec(): $request")
+
+            val reqObject = JSONObject(request)
+            val method = reqObject.optString("method")
+            val args = reqObject.optJSONObject("args")
+            val methodID = execID++
+
+            val obj = JSONObject()
+            obj.put("method", method)
+            obj.put("methodID", methodID)
+            obj.put("args", args)
+            sendUpdate(obj, true)
+
+            return methodID
+        }
+
+        fun reply(method: String, methodID: Int, response: JSONObject) {
+            val script = String.format("(function() { %s('%s', %d, '%s'); })()", replyCallback, method, methodID, response.toString())
+            cordova.activity.runOnUiThread {
+                webView.evaluateJavascript(script, null)
+            }
+        }
+    }
+
     companion object {
+
+        private var execID = 0
 
         private val LOG_TAG = "DappBrowser"
 

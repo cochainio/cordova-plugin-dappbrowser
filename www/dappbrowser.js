@@ -39,12 +39,20 @@
       'loaderror': channel.create('loaderror'),
       'exit': channel.create('exit'),
       'customscheme': channel.create('customscheme'),
+
+      'sign': channel.create('sign'),
+      'pushTransaction': channel.create('pushTransaction'),
     }
   }
 
   DappBrowser.prototype = {
     _eventHandler: function (event) {
-      if (event && (event.type in this.channels)) {
+      if (event.method && (event.method in this.channels)) {
+        const reply = this._reply
+        this.channels[event.method].fire(event.args, function (response) {
+          reply(event.method, event.methodID, response)
+        })
+      } else if (event && (event.type in this.channels)) {
         if (event.type === 'beforeload') {
           this.channels[event.type].fire(event, this._loadAfterBeforeload)
         } else {
@@ -101,6 +109,10 @@
           'insertCSS requires exactly one of code or file to be specified')
       }
     },
+
+    _reply: function (method, methodID, response) {
+      exec(null, null, 'DappBrowser', 'reply', [method, methodID, response])
+    }
   }
 
   module.exports = function (

@@ -72,8 +72,8 @@ open class DappChromeClient(private val webView: CordovaWebView) : WebChromeClie
    * If the client returns true, WebView will assume that the client will
    * handle the prompt dialog and call the appropriate JsPromptResult method.
    *
-   * The prompt bridge provided for the InAppBrowser is capable of executing any
-   * oustanding callback belonging to the InAppBrowser plugin. Care has been
+   * The prompt bridge provided for the DappBrowser is capable of executing any
+   * oustanding callback belonging to the DappBrowser plugin. Care has been
    * taken that other callbacks cannot be triggered, and that no other code
    * execution is possible.
    *
@@ -82,7 +82,7 @@ open class DappChromeClient(private val webView: CordovaWebView) : WebChromeClie
    * gap-iab://<callbackId>
    *
    * where <callbackId> is the string id of the callback to trigger (something
-   * like "InAppBrowser0123456789")
+   * like "DappBrowser0123456789")
    *
    * If present, the prompt message is expected to be a JSON-encoded value to
    * pass to the callback. A JSON_EXCEPTION is returned if the JSON is invalid.
@@ -115,7 +115,7 @@ open class DappChromeClient(private val webView: CordovaWebView) : WebChromeClie
         }
       } else {
         // Anything else with a gap: prefix should get this message
-        LOG.w(LOG_TAG, "InAppBrowser does not support Cordova API calls: $url $defaultValue")
+        LOG.w(LOG_TAG, "DappBrowser does not support Cordova API calls: $url $defaultValue")
         result.cancel()
         return true
       }
