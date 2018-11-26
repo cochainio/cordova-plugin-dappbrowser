@@ -40,20 +40,19 @@
       'exit': channel.create('exit'),
       'customscheme': channel.create('customscheme'),
 
-      'sign': channel.create('sign'),
-      'pushTransaction': channel.create('pushTransaction'),
+      'exec': channel.create('exec')
     }
   }
 
   DappBrowser.prototype = {
     _eventHandler: function (event) {
-      if (event.method && (event.method in this.channels)) {
-        const reply = this._reply
-        this.channels[event.method].fire(event.args, function (response) {
-          reply(event.method, event.methodID, response)
-        })
-      } else if (event && (event.type in this.channels)) {
-        if (event.type === 'beforeload') {
+      if (event && (event.type in this.channels)) {
+        if (event.type === 'exec') {
+          const reply = this._reply
+          this.channels[event.type].fire(event.method, event.args, function (response) {
+            reply(event.method, event.methodID, response)
+          })
+        } else if (event.type === 'beforeload') {
           this.channels[event.type].fire(event, this._loadAfterBeforeload)
         } else {
           this.channels[event.type].fire(event)

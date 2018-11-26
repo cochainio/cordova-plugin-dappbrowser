@@ -1139,6 +1139,7 @@ class DappBrowser : CordovaPlugin() {
             val methodID = execID++
 
             val obj = JSONObject()
+            obj.put("type", EXEC_EVENT)
             obj.put("method", method)
             obj.put("methodID", methodID)
             obj.put("args", args)
@@ -1173,6 +1174,7 @@ class DappBrowser : CordovaPlugin() {
         private val LOAD_START_EVENT = "loadstart"
         private val LOAD_STOP_EVENT = "loadstop"
         private val LOAD_ERROR_EVENT = "loaderror"
+        private val EXEC_EVENT = "exec"
 
         private val CLEAR_ALL_CACHE = "clearcache"
         private val CLEAR_SESSION_CACHE = "clearsessioncache"
