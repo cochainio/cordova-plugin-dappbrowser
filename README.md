@@ -1,6 +1,7 @@
 ---
 title: Dappbrowser
 description: Open an dapp browser window in a blockchain wallet app.
+---
 
 # cordova-plugin-dappbrowser
 
