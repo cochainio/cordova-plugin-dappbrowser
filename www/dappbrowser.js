@@ -50,7 +50,7 @@
         if (event.type === 'exec') {
           const reply = this._reply
           this.channels[event.type].fire(event.method, event.args, function (response) {
-            reply(event.method, event.methodID, response)
+            reply(event.method, event.methodID, JSON.stringify(response))
           })
         } else if (event.type === 'beforeload') {
           this.channels[event.type].fire(event, this._loadAfterBeforeload)

@@ -217,7 +217,7 @@ class DappBrowser : CordovaPlugin() {
             "reply" -> {
                 val method = args.getString(0)
                 val methodID = args.getInt(1)
-                val response = args.getJSONObject(2)
+                val response = args.getString(2)
                 if (dappJsObject != null) {
                     dappJsObject!!.reply(method, methodID, response)
                 }
@@ -371,6 +371,13 @@ class DappBrowser : CordovaPlugin() {
                     if (dialog != null) {
                         dialog!!.dismiss()
                         dialog = null
+                        try {
+                            if (dappWebView != null) {
+                                dappWebView!!.destroy()
+                            }
+                        } catch (ex: Throwable) {
+                          LOG.d(LOG_TAG, "May happen")
+                        }
                     }
                 }
             }
@@ -1148,8 +1155,9 @@ class DappBrowser : CordovaPlugin() {
             return methodID
         }
 
-        fun reply(method: String, methodID: Int, response: JSONObject) {
-            val script = String.format("(function() { %s('%s', %d, '%s'); })()", replyCallback, method, methodID, response.toString())
+        fun reply(method: String, methodID: Int, response: String) {
+            val rep = response.replace("'", "\\'")
+            val script = String.format("(function() { %s('%s', %d, '%s'); })()", replyCallback, method, methodID, rep)
             cordova.activity.runOnUiThread {
                 webView.evaluateJavascript(script, null)
             }
