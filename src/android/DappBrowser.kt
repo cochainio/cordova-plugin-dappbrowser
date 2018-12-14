@@ -20,13 +20,17 @@ package io.cochain.dappbrowser
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.DownloadManager
 import android.content.Context
+import android.content.Context.DOWNLOAD_SERVICE
 import android.content.Intent
 import android.provider.Browser
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.support.v4.app.ActivityCompat.startActivity
 import android.text.InputType
 import android.util.Log
 import android.util.TypedValue
@@ -39,12 +43,7 @@ import android.view.WindowManager.LayoutParams
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaArgs
@@ -727,6 +726,30 @@ class DappBrowser : CordovaPlugin() {
                     LayoutParams.MATCH_PARENT
                 )
                 dappWebView!!.id = Integer.valueOf(6)!!
+
+                dappWebView!!.setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                    val i = Intent(Intent.ACTION_VIEW)
+                    i.data = Uri.parse(url)
+                    cordova.activity.startActivity(i)
+
+                    /*
+                    val request = DownloadManager.Request(Uri.parse(url))
+                    request.setMimeType(mimetype)
+                    val cookies = CookieManager.getInstance().getCookie(url)
+                    request.addRequestHeader("cookie", cookies)
+                    request.addRequestHeader("User-Agent", userAgent)
+                    request.setDescription("Downloading file...")
+                    request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype))
+                    request.allowScanningByMediaScanner()
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                                                            URLUtil.guessFileName(url, contentDisposition, mimetype))
+                    val dm = cordova.activity.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                    dm.enqueue(request)
+                    Toast.makeText(cordova.activity.applicationContext, "Downloading File", Toast.LENGTH_LONG).show()
+                    */
+                }
+
                 // File Chooser Implemented ChromeClient
                 dappWebView!!.webChromeClient = object : DappChromeClient(thatWebView) {
                     // For Android 5.0+
