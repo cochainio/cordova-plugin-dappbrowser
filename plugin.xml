@@ -47,4 +47,52 @@
         <source-file src="src/android/build-extras.gradle" target-dir="."/>
 
     </platform>
+
+    <platform name="ios">
+        <js-module src="www/dappbrowser.js" name="dappbrowser">
+            <clobbers target="cordova.DappBrowser.open" />
+            <clobbers target="window.open" />
+        </js-module>
+        <config-file target="config.xml" parent="/*">
+            <feature name="DappBrowser">
+                <param name="ios-package" value="DappBrowser" />
+                <param name="onload" value="true" />
+            </feature>
+
+            <!--<feature name="DappBrowser">
+                <param name="ios-package" value="CDVInAppBrowser" />
+                <param name="onload" value="true" />
+            </feature>
+            <feature name="UIInAppBrowser">
+                <param name="ios-package" value="CDVUIInAppBrowser" />
+                <param name="onload" value="true" />
+            </feature>
+            <feature name="WKInAppBrowser">
+                <param name="ios-package" value="CDVWKInAppBrowser" />
+                <param name="onload" value="true" />
+            </feature>-->
+        </config-file>
+
+        <dependency id="cordova-plugin-add-swift-support" spec="~1.7.1" />
+        <source-file src="src/ios/DappBrowser.swift"/>
+        <source-file src="src/ios/DappBrowserNavigationController.swift"/>
+        <source-file src="src/ios/DappBrowserOptions.swift"/>
+        <source-file src="src/ios/DappBrowserUIDelegate.swift"/>
+
+        <!--<header-file src="src/ios/CDVInAppBrowser.h" />
+        <source-file src="src/ios/CDVInAppBrowser.m" />
+        <header-file src="src/ios/CDVInAppBrowserOptions.h" />
+        <source-file src="src/ios/CDVInAppBrowserOptions.m" />
+        <header-file src="src/ios/CDVInAppBrowserNavigationController.h" />
+        <source-file src="src/ios/CDVInAppBrowserNavigationController.m" />
+        <header-file src="src/ios/CDVUIInAppBrowser.h" />
+        <source-file src="src/ios/CDVUIInAppBrowser.m" />
+        <header-file src="src/ios/CDVWKInAppBrowser.h" />
+        <source-file src="src/ios/CDVWKInAppBrowser.m" />
+        <header-file src="src/ios/CDVWKInAppBrowserUIDelegate.h" />
+        <source-file src="src/ios/CDVWKInAppBrowserUIDelegate.m" />-->
+
+        <framework src="CoreGraphics.framework" />
+    </platform>
+
 </plugin>
