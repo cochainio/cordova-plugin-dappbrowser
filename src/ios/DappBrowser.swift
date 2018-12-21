@@ -27,6 +27,8 @@ class DappBrowser: CDVPlugin {
 
     var dappBrowserViewController: DappBrowserViewController? = nil
 
+    var nextMethodID = 0
+
     override func pluginInitialize() {
         super.pluginInitialize()
         useBeforeload = false
@@ -34,6 +36,7 @@ class DappBrowser: CDVPlugin {
         previousStatusBarStyle = -1
         callbackId = ""
         dappBrowserViewController = nil
+        nextMethodID = 0
     }
 
     func setting(forKey key: String) -> Any? {
@@ -412,6 +415,17 @@ class DappBrowser: CDVPlugin {
         injectDeferredObject(command.argument(at: 0) as! String, withWrapper: jsWrapper)
     }
 
+    @objc(reply:)
+    func reply(_ command: CDVInvokedUrlCommand) {
+        let method = command.argument(at: 0) as! String
+        let methodID = command.argument(at: 1) as! Int
+        var response = command.argument(at: 2) as! String
+
+        print(method, methodID, response)
+        response = response.replacingOccurrences(of: "'", with: "\\'")
+        evaluateJavaScript("(function() { cochain.callback('\(method)', \(methodID), '\(response)') })()")
+    }
+
     func webView(_ theWebView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         let url = navigationAction.request.url
         let mainDocumentURL = navigationAction.request.mainDocumentURL
@@ -491,6 +505,26 @@ class DappBrowser: CDVPlugin {
         }
     }
 
+    func userContentControllerForCochain(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if (!callbackId.isEmpty) {
+            let req = message.body as! [String: Any]
+            let method = req["method"] as! String
+            let methodID = req["methodID"] as! Int
+            let args = req["args"] as! [String: Any]
+
+            nextMethodID = methodID + 1
+
+            var dResult = [String: Any]()
+            dResult["type"] = "exec"
+            dResult["method"] = method
+            dResult["methodID"] = methodID
+            dResult["args"] = args
+            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: dResult)
+            pluginResult!.keepCallback = (1)
+            commandDelegate.send(pluginResult, callbackId: callbackId)
+        }
+    }
+
     func didStartProvisionalNavigation(_ theWebView: WKWebView?) {
         print("didStartProvisionalNavigation")
     }
@@ -510,6 +544,8 @@ class DappBrowser: CDVPlugin {
 
             commandDelegate.send(pluginResult, callbackId: callbackId)
         }
+
+        evaluateJavaScript("(function() { if (!window.cochain) window.cochain = {}; window.cochain.nextMethodID = \(nextMethodID) })()")
     }
 
     func webView(_ theWebView: WKWebView?, didFailNavigation: Error) {
@@ -543,6 +579,7 @@ class DappBrowser: CDVPlugin {
 
         if dappBrowserViewController != nil {
             dappBrowserViewController!.configuration?.userContentController.removeScriptMessageHandler(forName: IAB_BRIDGE_NAME)
+            dappBrowserViewController!.configuration?.userContentController.removeScriptMessageHandler(forName: "cochain")
             dappBrowserViewController!.configuration = nil
 
             dappBrowserViewController!.webView?.stopLoading()
@@ -620,6 +657,7 @@ class DappBrowserViewController: UIViewController, WKNavigationDelegate, WKUIDel
         let configuration = WKWebViewConfiguration()
         configuration.userContentController = userContentController
         configuration.userContentController.add(self, name: IAB_BRIDGE_NAME)
+        configuration.userContentController.add(self, name: "cochain")
 
         //WKWebView options
         configuration.allowsInlineMediaPlayback = browserOptions.allowinlinemediaplayback
@@ -1099,10 +1137,11 @@ class DappBrowserViewController: UIViewController, WKNavigationDelegate, WKUIDel
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if !(message.name == IAB_BRIDGE_NAME) {
-            return
+        if (message.name == IAB_BRIDGE_NAME) {
+            navigationDelegate?.userContentController(userContentController, didReceive: message)
+        } else if (message.name == "cochain") {
+            navigationDelegate?.userContentControllerForCochain(userContentController, didReceive: message)
         }
-        navigationDelegate?.userContentController(userContentController, didReceive: message)
     }
 
     @objc override var shouldAutorotate: Bool {

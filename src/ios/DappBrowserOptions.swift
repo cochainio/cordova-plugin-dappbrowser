@@ -31,7 +31,7 @@ class DappBrowserOptions {
         if options.isEmpty {
             return
         }
-        
+
         let pairs = options.split(separator: ",")
         
         // parse keys and values, set the properties
